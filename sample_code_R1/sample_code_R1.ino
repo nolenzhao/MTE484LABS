@@ -37,6 +37,14 @@ void  loop() {
   // Proportional Controller
   float u_z = Kp * err; 
 
+  if(motor_pos > 0.7){
+    motor_pos = 0.7;
+  }
+
+  if(motor_pos < -0.7){
+    motor_pos = -0.7;
+  }
+
   if(u_z > 0){
     setMotorVoltage(u_z + 0.26);
   }
