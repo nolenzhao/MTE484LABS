@@ -110,15 +110,15 @@ def calc_damping(OS):
         # Solving for ζ: ζ = -ln(OS) / √(π² + ln(OS)²)
         ln_OS = math.log(OS)
         denom = math.sqrt(pi**2 + ln_OS**2)
-        damping = -ln_OS / denom
+        return  -ln_OS / denom
         
-        print(f"Debug: ln(OS)={ln_OS:.3f}, damping={damping:.4f}")
+        # print(f"Debug: ln(OS)={ln_OS:.3f}, damping={damping:.4f}")
         
-        # Damping ratio should be between 0 and 1 for underdamped systems
-        if damping < 0 or damping > 1:
-            print(f"⚠️  Warning: Damping ratio {damping:.4f} is outside typical range [0,1]")
+        # # Damping ratio should be between 0 and 1 for underdamped systems
+        # if damping < 0 or damping > 1:
+        #     print(f"⚠️  Warning: Damping ratio {damping:.4f} is outside typical range [0,1]")
         
-        return damping  # Take absolute value to ensure positive
+        # return damping 
     except ValueError as e:
         print(f"Error in damping calculation: {e}")
         return np.nan
@@ -131,10 +131,11 @@ def calc_frequency(tp, damping):
     return pi / (tp * math.sqrt(1 - damping**2))
 
 
+def calc_tau(damp, frequency):
+    return 1 / ( 2 *damp * frequency)
 
-
-def calc_k1():
-    pass
+def calc_k1(frequency, tau, gain): 
+    return (frequency**2 * tau) / gain
 
 
 def find_OS(): 
@@ -157,7 +158,8 @@ def find_OS():
         return 0.0
     
     # Correct overshoot calculation: (peak - steady_state) / step_size
-    overshoot = (y_max - y_final) / step_size
+    overshoot = ((y_max - y_init) - (step_size)) / step_size
+    # overshoot = (y_max - y_final) / step_size
     
     print(f"Debug: y_init={y_init:.4f}, y_final={y_final:.4f}, y_max={y_max:.4f}")
     print(f"Debug: step_size={step_size:.4f}, overshoot={overshoot:.4f}")
@@ -172,9 +174,11 @@ def find_TP():
     max_idx = np.argmax(y)
     
     # Return time to peak from the start of measurement
-    return t[max_idx] - t[0]
+    return (t[max_idx] - t[0]) / 1000 # Convert ms to s
 
 if __name__ == "__main__": 
+
+    kp = 20.0
 
     init()
     OS = find_OS()
@@ -182,59 +186,25 @@ if __name__ == "__main__":
     tp = find_TP()
     frequency = calc_frequency(tp, damp)
     settling = calc_settling(damp, frequency)
+    tau = calc_tau(damp, frequency)
+    k1 = calc_k1(frequency, tau, kp)  # Assuming gain
     
     # Calculate additional characteristics
     # natural_freq = frequency / math.sqrt(1 - damp**2) if damp < 1 else frequency
     # overshoot_percent = OS * 100 if not np.isnan(OS) else np.nan
+    print("\n")
     
-    print("\n" + "="*60)
-    print("           STEP RESPONSE CHARACTERISTICS")
-    print("="*60)
-    
-    print(f"\n📊 DATA SUMMARY:")
-    print(f"   • Data points analyzed: {len(y)}")
-    print(f"   • Initial value (y₀):   {y_init:.4f} rad")
-    print(f"   • Final value (y∞):     {y[-1]:.4f} rad")
-    print(f"   • Peak value (yₘₐₓ):     {np.max(y):.4f} rad")
-    
-    print(f"\n⏱️  TIME DOMAIN CHARACTERISTICS:")
-    print(f"   • Time to peak (tₚ):     {tp:.1f} ms")
-    print(f"   • Settling time (t₅):    {settling:.1f} ms")
-    
-    print(f"\n📈 OVERSHOOT & DAMPING:")
-    print(f"   • Overshoot ratio:       {OS:.3f}")
-    # print(f"   • Overshoot percentage:  {overshoot_percent:.1f}%")
-    print(f"   • Damping ratio (ζ):     {damp:.4f}")
-    
-    print(f"\n🔄 FREQUENCY CHARACTERISTICS:")
-    # print(f"   • Damped frequency (ωd): {frequency:.6f} rad/ms")
-    print(f"   • Natural frequency (ωn): {frequency:.6f} rad/ms")
-    
-    print(f"\n🎯 SYSTEM CLASSIFICATION:")
-    if damp < 0:
-        system_type = "⚠️  UNSTABLE (negative damping)"
-    elif damp == 0:
-        system_type = "🔄 UNDAMPED (oscillatory)"
-    elif 0 < damp < 1:
-        system_type = "📉 UNDERDAMPED (oscillatory with decay)"
-    elif damp == 1:
-        system_type = "⚖️  CRITICALLY DAMPED"
-    elif damp > 1:
-        system_type = "📊 OVERDAMPED"
-    else:
-        system_type = "❓ UNDEFINED"
-    
-    print(f"   • System type: {system_type}")
-    
-    print("\n" + "="*60)
-    
-    # Raw values for debugging (if needed)
-    print(f"\n🔧 RAW VALUES (for debugging):")
-    print(f"   OS={OS}")
-    print(f"   damp={damp}")
-    print(f"   tp={tp}")
-    print(f"   frequency={frequency}")
-    print(f"   settling={settling}")
+    print(f"{OS=}")
+    print(f"{damp=}")
+    print(f"{tp=}")
+    print(f"{frequency=}")
+    print(f"{settling=}")
+    print(f"{tau=}")
+    print(f"{k1=}")
+
+
+
+
 
 
 
