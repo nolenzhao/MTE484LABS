@@ -22,7 +22,7 @@ void setup() {
 
 // ================== Loop ==================
 
-static constexpr float Kp = 20.0f;
+static constexpr float Kp = 18.0f;
 static constexpr float pi = 3.141592;
 static constexpr float m = - pi/ 228;
 static constexpr float x = 7.03;
