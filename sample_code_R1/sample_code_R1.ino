@@ -26,8 +26,9 @@ static constexpr float Kp = 18.0f;
 static constexpr float pi = 3.141592;
 static constexpr float m = - pi/ 228;
 static constexpr float x = 7.03;
-static constexpr float target = 0;
-
+static constexpr float target = -2;
+static constexpr float cw_stiction = 0.26;
+static constexpr float ccw_stiction = -0.21;
 
 void  loop() {
 
@@ -38,22 +39,26 @@ void  loop() {
   float u_z = Kp * err; 
 
   if(motor_pos > 0.7){
-    motor_pos = 0.7;
+    setMotorVoltage(0.1 + cw_stiction);
   }
-
-  if(motor_pos < -0.7){
-    motor_pos = -0.7;
-  }
-
-  if(u_z > 0){
-    setMotorVoltage(u_z + 0.26);
+  else if(motor_pos < -0.7){
+    setMotorVoltage(-0.1 + ccw_stiction);
   }
   else{
-    setMotorVoltage(u_z - 0.21);    
+    if(u_z > 0){
+      setMotorVoltage(u_z + cw_stiction);
+    }
+    else{
+      setMotorVoltage(u_z + ccw_stiction);    
+    }
   }
+
+
 
 
   Serial.print(millis());
+  Serial.print(","); 
+  Serial.print(err);
   Serial.print(","); 
   Serial.println(motor_pos);
 }
