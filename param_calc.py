@@ -73,25 +73,16 @@ def init():
     
     print(f"Original data: {len(data)} points")
     print(f"Y range: [{data['y'].min():.4f}, {data['y'].max():.4f}]")
-    print(f"Y mean: {data['y'].mean():.4f}, std: {data['y'].std():.4f}")
     
-    # More aggressive outlier removal using percentiles
-    # Remove values beyond 1st and 99th percentiles
-    p1 = data['y'].quantile(0.01)
-    p99 = data['y'].quantile(0.99)
+    # Use all data - no outlier removal for step response analysis
+    t = data["x"].to_numpy()
+    y = data["y"].to_numpy()
     
-    before_count = len(data)
-    data_clean = data[(data['y'] >= p1) & (data['y'] <= p99)]
-    after_count = len(data_clean)
+    print(f"Using all {len(y)} data points")
+    print(f"Final Y range: [{y.min():.4f}, {y.max():.4f}]")
     
-    print(f"Percentile outlier removal (1st-99th): {before_count} -> {after_count} points (removed {before_count - after_count})")
-    print(f"Bounds: [{p1:.4f}, {p99:.4f}]")
-    
-    # Extract cleaned data
-    t = data_clean["x"].to_numpy()
-    y = data_clean["y"].to_numpy()
-    
-    print(f"Final data: {len(y)} points")
+    # Set initial value for overshoot calculation
+    y_init = y[10] if len(y) > 10 else y[0]
     print(f"Final Y range: [{y.min():.4f}, {y.max():.4f}]")
     
     # Set initial value for overshoot calculation
@@ -112,13 +103,6 @@ def calc_damping(OS):
         denom = math.sqrt(pi**2 + ln_OS**2)
         return  -ln_OS / denom
         
-        # print(f"Debug: ln(OS)={ln_OS:.3f}, damping={damping:.4f}")
-        
-        # # Damping ratio should be between 0 and 1 for underdamped systems
-        # if damping < 0 or damping > 1:
-        #     print(f"⚠️  Warning: Damping ratio {damping:.4f} is outside typical range [0,1]")
-        
-        # return damping 
     except ValueError as e:
         print(f"Error in damping calculation: {e}")
         return np.nan
@@ -142,7 +126,10 @@ def find_OS():
     global y, y_max, y_final, y_init
 
     y_final = y[-1]
-    y_max = np.max(y)
+    
+    # y_max should already be set by find_TP()
+    if 'y_max' not in globals() or y_max is None:
+        y_max = np.max(y)
     
     # Check for NaN or invalid values
     if np.isnan(y_final) or np.isnan(y_max):
@@ -170,20 +157,23 @@ def find_OS():
 def find_TP(): 
     global t, y, y_init, y_max
     
-    # Find the index of the maximum value (first occurrence)
+    # Find the index of the maximum value in the raw data
     max_idx = np.argmax(y)
+    y_max = y[max_idx]
+    
+    print(f"Peak detection: max={y_max:.4f} at idx={max_idx}, time={(t[max_idx] - t[0])/1000:.3f}s")
     
     # Return time to peak from the start of measurement
     return (t[max_idx] - t[0]) / 1000 # Convert ms to s
 
 if __name__ == "__main__": 
 
-    kp = 20.0
+    kp = 18.0
 
     init()
-    OS = find_OS()
+    tp = find_TP()  # Call this first to set y_max with smoothed value
+    OS = find_OS()  # Now this will use the smoothed y_max
     damp = calc_damping(OS)
-    tp = find_TP()
     frequency = calc_frequency(tp, damp)
     settling = calc_settling(damp, frequency)
     tau = calc_tau(damp, frequency)
