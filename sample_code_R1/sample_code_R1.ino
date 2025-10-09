@@ -26,32 +26,30 @@ static constexpr float Kp = 16.0f;
 static constexpr float pi = 3.141592;
 static constexpr float m = - pi/ 228;
 static constexpr float x = 7.03;
-static constexpr float target = 0;
+static constexpr float target = 2;
 static constexpr float cw_stiction = 0.26;
 static constexpr float ccw_stiction = -0.21;
 
 void  loop() {
 
+  float clamped_target = target;
+  if (clamped_target > 0.7) {
+    clamped_target = 0.7;
+  }
+
   float motor_val = analogRead(MOT_PIN);
   float motor_pos = m * motor_val + x; 
-  float err = motor_pos - target;
+  float err = motor_pos - clamped_target;
   // Proportional Controller
   float u_z = Kp * err; 
 
-  if(motor_pos > 0.7){
-    setMotorVoltage(0.1 + cw_stiction);
-  }
-  else if(motor_pos < -0.7){
-    setMotorVoltage(-0.1 + ccw_stiction);
+  if(u_z > 0){
+    setMotorVoltage(u_z + cw_stiction);
   }
   else{
-    if(u_z > 0){
-      setMotorVoltage(u_z + cw_stiction);
-    }
-    else{
-      setMotorVoltage(u_z + ccw_stiction);    
-    }
+    setMotorVoltage(u_z + ccw_stiction);    
   }
+
 
 
 
