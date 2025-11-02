@@ -77,17 +77,6 @@ void  loop() {
     cont_output[i] = cont_output[i-1];
   }
 
-  Serial.println("Errors Array");
-  for(int i = 0; i < num_size; i++){
-    Serial.print(errors[i]);
-    Serial.print(",");
-  }
-
-  Serial.println("cont_array");
-  for(int i = 0; i < denom_size - 1; i++){
-    Serial.print(cont_output[i]);
-    Serial.print(",");
-  }
 
   float curr_cont_output = 0;
 
@@ -116,7 +105,7 @@ void  loop() {
 
 
 
-  delay(23.33375);
+  delay(21);
   
   Serial.print(millis()); 
   Serial.print(",");
