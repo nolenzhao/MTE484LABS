@@ -7,10 +7,10 @@ int BAL_PIN = A1;   // ball position sensor
 
 static constexpr int num_size = 4;
 static constexpr int denom_size = 5;
-// double numerator[num_size] = {5.220991266182068, 2.19347716081792, 3.01262904487014, -1.945180614295883}; 
-// double denominator[denom_size] = {1.0f, 0.4237, 0.446101301973525, 0.260556510434016, 0.078940914984297};
-float numerator[num_size] = {5.221, 2.1935, 3.0126, -1.9452}; 
-float denominator[denom_size] = {1.0f, 0.4237, 0.4461, 0.2606, 0.0789};
+double numerator[num_size] = {5.220991266182068, 2.19347716081792, 3.01262904487014, -1.945180614295883}; 
+double denominator[denom_size] = {1.0f, 0.4237, 0.446101301973525, 0.260556510434016, 0.078940914984297};
+// double numerator[num_size] = {5.221, 2.1935, 3.0126, -1.9452}; 
+// double denominator[denom_size] = {1.0f, 0.4237, 0.4461, 0.2606, 0.0789};
 float errors[num_size] = {0, 0, 0, 0};
 float cont_output[denom_size - 1] = {0, 0, 0, 0};
 // ================== Setup ==================
@@ -35,10 +35,10 @@ static constexpr float Kp = 16.0f;
 static constexpr float pi = 3.141592;
 static constexpr float m = - pi/ 228;
 static constexpr float x = 7.03;
-static constexpr float target = 0;
+static float target = 0.7;
 static constexpr float cw_stiction = 0.26;
 static constexpr float ccw_stiction = -0.21;
-
+static int cnter = 0;
 
 
 void  loop() {
@@ -51,12 +51,20 @@ void  loop() {
     clamped_target = 0.7;
   }
 
+  if(cnter >= 128){
+    target = -target;
+    cnter = 0;
+  }
+  cnter++;
+
+
   // Calculate motor_encoder value, and corresponding motor position
   float motor_val = analogRead(MOT_PIN);
   float motor_pos = m * motor_val + x; 
 
   // Calculate Error 
   float err = motor_pos - clamped_target;
+
 
   // Move errors back 
   for(int i = num_size - 1; i > 0; i--){
@@ -91,26 +99,33 @@ void  loop() {
   }
 
   curr_cont_output /= denominator[0];
-
-  if(curr_cont_output > 0){
-    setMotorVoltage(curr_cont_output + cw_stiction);
+  if(abs(err) <= 0.018){
+    setMotorVoltage(0);
   }
   else{
-    setMotorVoltage(curr_cont_output + ccw_stiction);    
+    if(curr_cont_output > 0){
+      setMotorVoltage(curr_cont_output + cw_stiction);
+    }
+    else{
+      setMotorVoltage(curr_cont_output + ccw_stiction);    
+    }
   }
+
 
   cont_output[0] = curr_cont_output;
 
 
+
   delay(23.33375);
-  Serial.print(millis());
-  Serial.print(","); 
-  Serial.print(err);
-  Serial.print(","); 
-  Serial.print(motor_pos);
-  Serial.print(","); 
   
-  Serial.println(curr_cont_output);
+  Serial.print(millis()); 
+  Serial.print(",");
+  Serial.print(err);
+  Serial.print(",");
+  Serial.print(curr_cont_output);
+  Serial.print(","); 
+  Serial.println(motor_pos);
+
 }
 
 // ================== Control ISR ==================
