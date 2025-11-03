@@ -73,10 +73,7 @@ void  loop() {
   // Update front of errors array 
   errors[0] = err;
 
-  Serial.println("Errors");
-  for(int i = 0; i < num_size; i++){
-    Serial.print(errors[i]);
-  }
+
   for(int i = denom_size - 2; i > 0; i--){
     cont_output[i] = cont_output[i-1];
   }
