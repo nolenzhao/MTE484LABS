@@ -48,8 +48,10 @@ static constexpr float cw_stiction_beam = 0.12;
 static constexpr float ccw_stiction_beam = -0.6;
 
 static constexpr float BEAM_LEN = 0.417;
+static constexpr float lever_len = 0.12;
 static constexpr float beam_slope = 0.001064;
 static constexpr float beam_intercept = -0.33088;
+static constexpr float K2 = lever_len / BEAM_LEN;
 
 void  loop() {
 
