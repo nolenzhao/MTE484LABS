@@ -5,14 +5,14 @@
 int MOT_PIN = A0;   // motor angle sensor
 int BAL_PIN = A1;   // ball position sensor
 
-static constexpr int num_size = 4;
-static constexpr int denom_size = 5;
-double numerator[num_size] = {5.220991266182068, 2.19347716081792, 3.01262904487014, -1.945180614295883}; 
-double denominator[denom_size] = {1.0f, 0.4237, 0.446101301973525, 0.260556510434016, 0.078940914984297};
+static constexpr int num_size = 6;
+static constexpr int denom_size = 7;
+double numerator[num_size] = {2.071976659937931,  -1.177526097484510,   0.848617262443376,  -0.853462005642522,   2.025249107441213,  -0.731802716052993}; 
+double denominator[denom_size] = {1.000000000000000,  -0.568099999996817,   0.344268203014128,   0.032703260474788,   0.055804478151949,   0.060269872157765,   0.029551869667183};
 // double numerator[num_size] = {5.221, 2.1935, 3.0126, -1.9452}; 
 // double denominator[denom_size] = {1.0f, 0.4237, 0.4461, 0.2606, 0.0789};
-float errors[num_size] = {0, 0, 0, 0};
-float cont_output[denom_size - 1] = {0, 0, 0, 0};
+float errors[num_size] = {0, 0, 0, 0, 0, 0};
+float cont_output[denom_size - 1] = {0, 0, 0, 0, 0, 0};
 // ================== Setup ==================
 void setup() {
 
@@ -73,7 +73,11 @@ void  loop() {
   // Update front of errors array 
   errors[0] = err;
 
-  for(int i = denom_size -1; i > 0; i--){
+  Serial.println("Errors");
+  for(int i = 0; i < num_size; i++){
+    Serial.print(errors[i]);
+  }
+  for(int i = denom_size - 2; i > 0; i--){
     cont_output[i] = cont_output[i-1];
   }
 
@@ -88,6 +92,7 @@ void  loop() {
   }
 
   curr_cont_output /= denominator[0];
+
   if(abs(err) <= 0.018){
     setMotorVoltage(0);
   }
