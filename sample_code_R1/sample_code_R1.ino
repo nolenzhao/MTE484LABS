@@ -7,12 +7,16 @@ int BAL_PIN = A1;   // ball position sensor
 
 static constexpr int num_size = 6;
 static constexpr int denom_size = 7;
-double numerator[num_size] = {2.071976659937931,  -1.177526097484510,   0.848617262443376,  -0.853462005642522,   2.025249107441213,  -0.731802716052993}; 
-double denominator[denom_size] = {1.000000000000000,  -0.568099999996817,   0.344268203014128,   0.032703260474788,   0.055804478151949,   0.060269872157765,   0.029551869667183};
+double numerator[num_size] = {2.191042856736779 , -1.244715000739053,  0.892620562448263,   0.306902605622103,   0.234368769132498,  -0.197167582568173}; 
+double denominator[denom_size] = {  1.000000000000000,  -0.568099999998879 ,  0.341651128008823 ,  0.028556296287117 ,  0.051161768362048  , 0.029203276104001,   0.008172368274057};
 // double numerator[num_size] = {5.221, 2.1935, 3.0126, -1.9452}; 
 // double denominator[denom_size] = {1.0f, 0.4237, 0.4461, 0.2606, 0.0789};
 float errors[num_size] = {0, 0, 0, 0, 0, 0};
 float cont_output[denom_size - 1] = {0, 0, 0, 0, 0, 0};
+
+
+float voltage;
+
 // ================== Setup ==================
 void setup() {
 
@@ -26,7 +30,7 @@ void setup() {
 
   Serial.println("geeWhiz Started");
 
-
+  voltage = 0;
 }
 
 // ================== Loop ==================
@@ -40,11 +44,22 @@ static constexpr float cw_stiction = 0.26;
 static constexpr float ccw_stiction = -0.21;
 static int cnter = 0;
 
+static constexpr float cw_stiction_beam = 0.12;
+static constexpr float ccw_stiction_beam = -0.6;
+
+static constexpr float BEAM_LEN = 0.417;
+static constexpr float beam_slope = 0.001064;
+static constexpr float beam_intercept = -0.33088;
 
 void  loop() {
 
   // Proportional Controller
-  // float u_z = Kp * err; 
+  // float u_z = Kp * err;
+
+
+
+
+
 
   float clamped_target = target;
   if (clamped_target > 0.7) {
@@ -90,32 +105,33 @@ void  loop() {
 
   curr_cont_output /= denominator[0];
 
-  if(abs(err) <= 0.018){
+  if(abs(err) <= 0.02){
     setMotorVoltage(0);
   }
   else{
     if(curr_cont_output > 0){
-      setMotorVoltage(curr_cont_output + cw_stiction);
+      setMotorVoltage(curr_cont_output + cw_stiction_beam);
     }
     else{
-      setMotorVoltage(curr_cont_output + ccw_stiction);    
+      setMotorVoltage(curr_cont_output + ccw_stiction_beam);    
     }
   }
 
-
   cont_output[0] = curr_cont_output;
 
-
-
   delay(21);
-  
+  int ball = analogRead(BAL_PIN);
+  float ball_position = beam_slope * ball + beam_intercept;
+
   Serial.print(millis()); 
   Serial.print(",");
   Serial.print(err);
   Serial.print(",");
   Serial.print(curr_cont_output);
   Serial.print(","); 
-  Serial.println(motor_pos);
+  Serial.print(motor_pos);
+  Serial.print(",");
+  Serial.println(ball_position);
 
 }
 
