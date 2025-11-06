@@ -53,6 +53,20 @@ static constexpr float beam_slope = 0.001064;
 static constexpr float beam_intercept = -0.33088;
 static constexpr float K2 = lever_len / BEAM_LEN;
 
+void graph_k3(){
+  Serial.print(millis());
+  Serial.print(",");
+  Serial.println(calc_ball_pos(), 3);
+
+}
+
+float calc_ball_pos(){
+  int ball = analogRead(BAL_PIN);
+  float ball_position = beam_slope * ball + beam_intercept;
+  return ball_position;
+}
+
+
 void  loop() {
 
   // Proportional Controller
@@ -122,18 +136,19 @@ void  loop() {
   cont_output[0] = curr_cont_output;
 
   delay(21);
-  int ball = analogRead(BAL_PIN);
-  float ball_position = beam_slope * ball + beam_intercept;
 
-  Serial.print(millis()); 
-  Serial.print(",");
-  Serial.print(err);
-  Serial.print(",");
-  Serial.print(curr_cont_output);
-  Serial.print(","); 
-  Serial.print(motor_pos);
-  Serial.print(",");
-  Serial.println(ball_position);
+  graph_k3();
+
+  // float b_pos = calc_ball_pos();
+  // Serial.print(millis()); 
+  // Serial.print(",");
+  // Serial.print(err);
+  // Serial.print(",");
+  // Serial.print(curr_cont_output);
+  // Serial.print(","); 
+  // Serial.print(motor_pos);
+  // Serial.print(",");
+  // Serial.println(b_pos);
 
 }
 
