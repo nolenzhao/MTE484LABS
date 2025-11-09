@@ -67,6 +67,7 @@ float calc_ball_pos(){
 }
 
 
+
 void  loop() {
 
   // Proportional Controller
@@ -77,67 +78,76 @@ void  loop() {
 
 
 
-  float clamped_target = target;
-  if (clamped_target > 0.7) {
-    clamped_target = 0.7;
-  }
+  // float clamped_target = target;
+  // if (clamped_target > 0.7) {
+  //   clamped_target = 0.7;
+  // }
 
-  if(cnter >= 128){
-    target = -target;
-    cnter = 0;
-  }
-  cnter++;
+  // if(cnter >= 128){
+  //   target = -target;
+  //   cnter = 0;
+  // }
+  // cnter++;
 
 
-  // Calculate motor_encoder value, and corresponding motor position
+  // // Calculate motor_encoder value, and corresponding motor position
   float motor_val = analogRead(MOT_PIN);
   float motor_pos = m * motor_val + x; 
 
-  // Calculate Error 
-  float err = motor_pos - clamped_target;
+  // // Calculate Error 
+  // float err = motor_pos - clamped_target;
 
 
-  // Move errors back 
-  for(int i = num_size - 1; i > 0; i--){
-    errors[i] = errors[i-1];
-  }
-  // Update front of errors array 
-  errors[0] = err;
+  // // Move errors back 
+  // for(int i = num_size - 1; i > 0; i--){
+  //   errors[i] = errors[i-1];
+  // }
+  // // Update front of errors array 
+  // errors[0] = err;
 
 
-  for(int i = denom_size - 2; i > 0; i--){
-    cont_output[i] = cont_output[i-1];
-  }
+  // for(int i = denom_size - 2; i > 0; i--){
+  //   cont_output[i] = cont_output[i-1];
+  // }
 
 
-  float curr_cont_output = 0;
+  // float curr_cont_output = 0;
 
-  for(int i = 0; i < num_size; i++){
-    curr_cont_output += numerator[i] * errors[i];
-  }
-  for(int i = 1; i < denom_size; i++){
-    curr_cont_output -= denominator[i] * cont_output[i];
-  }
+  // for(int i = 0; i < num_size; i++){
+  //   curr_cont_output += numerator[i] * errors[i];
+  // }
+  // for(int i = 1; i < denom_size; i++){
+  //   curr_cont_output -= denominator[i] * cont_output[i];
+  // }
 
-  curr_cont_output /= denominator[0];
+  // curr_cont_output /= denominator[0];
 
-  if(abs(err) <= 0.02){
-    setMotorVoltage(0);
-  }
-  else{
-    if(curr_cont_output > 0){
-      setMotorVoltage(curr_cont_output + cw_stiction_beam);
-    }
-    else{
-      setMotorVoltage(curr_cont_output + ccw_stiction_beam);    
-    }
-  }
+  // if(abs(err) <= 0.02){
+  //   setMotorVoltage(0);
+  // }
+  // else{
+  //   if(curr_cont_output > 0){
+  //     setMotorVoltage(curr_cont_output + cw_stiction_beam);
+  //   }
+  //   else{
+  //     setMotorVoltage(curr_cont_output + ccw_stiction_beam);    
+  //   }
+  // }
 
-  cont_output[0] = curr_cont_output;
+  // cont_output[0] = curr_cont_output;
 
   delay(21);
+  delay(500);
+  
+  voltage -= 0.01;
 
-  graph_k3();
+  setMotorVoltage(voltage);
+  // graph_k3();
+  Serial.print(millis()); 
+  Serial.print(","); 
+  Serial.print(motor_pos);
+  Serial.print(",");
+  Serial.println(voltage);
 
   // float b_pos = calc_ball_pos();
   // Serial.print(millis()); 
