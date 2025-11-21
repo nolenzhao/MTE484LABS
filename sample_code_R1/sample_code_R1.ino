@@ -46,12 +46,12 @@ static constexpr float m = - pi/ 228;
 static constexpr float x = 7.03;
 static constexpr float cw_stiction = 0.26;
 static constexpr float ccw_stiction = -0.21;
-static int cnter = 0;
+
 static int outerCnter = 0;
 
 static constexpr float cw_stiction_beam = 0.12;
 static constexpr float ccw_stiction_beam = -0.6;
-float target = 0;
+float target = 0.2085;
 static constexpr float BEAM_LEN = 0.417;
 static constexpr float lever_len = 0.12;
 static constexpr float beam_slope = 0.001064;
@@ -85,14 +85,18 @@ void  loop() {
 
 
 
-  
+  // make sure angle_outputisnt being set in innner loop to 0 after updating // sepearted when the inner lop reads from angle_output
+
   float angle_output = 0;
 
   if(outerCnter == 15){
     for(int i = num_size_outer - 1; i > 0; i--){
       errors_outer[i] = errors_outer[i-1];
     }
-    float err = target - calc_ball_pos();
+    float err = calc_ball_pos()- target;
+
+    Serial.print("Error: "); 
+    Serial.print(err);
     // Update front of errors array 
     errors_outer[0] = err;
 
@@ -109,16 +113,24 @@ void  loop() {
     }
 
     angle_output /= denominator_outer[0];
+    cont_output_outer[0] = angle_output;
     outerCnter = 0;
+
+    Serial.print("angle output: ");
+    Serial.print(angle_output);
+    
   } 
+
 
   float clamped_angle = angle_output;
   if (clamped_angle > 0.7) {
     clamped_angle = 0.7;
   }
-  else if(clamped_angle < 0.7){
+  else if(clamped_angle < -0.7){
     clamped_angle = -0.7;
   }
+  Serial.print("clamped angle");
+  Serial.print(clamped_angle);
 
 
   // // Calculate motor_encoder value, and corresponding motor position
@@ -127,7 +139,6 @@ void  loop() {
 
   // Calculate Error 
   float err = motor_pos - clamped_angle;
-
 
   // Move errors back 
   for(int i = num_size_inner - 1; i > 0; i--){
@@ -170,18 +181,19 @@ void  loop() {
   delay(inner_sampling);
   outerCnter++;
 
+  Serial.println("");
 
-  float b_pos = calc_ball_pos();
-  Serial.print(millis()); 
-  Serial.print(",");
-  Serial.print(err);
-  Serial.print(",");
-  Serial.print(curr_cont_output);
-  Serial.print(","); 
-  Serial.print(motor_pos);
-  Serial.print(",");
-  Serial.println(b_pos);
 
+  // float b_pos = calc_ball_pos();
+  // Serial.print(millis()); 
+  // Serial.print(",");
+  // Serial.print(err);
+  // Serial.print(",");
+  // Serial.print(curr_cont_output);
+  // Serial.print(","); 
+  // Serial.print(motor_pos);
+  // Serial.print(",");
+  // Serial.println(b_pos);
 }
 
 // ================== Control ISR ==================
