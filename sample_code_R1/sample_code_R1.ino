@@ -131,13 +131,20 @@ void  loop() {
 
     
   // Serial.print("Current angle: ");
-  Serial.print(motor_pos);
+  Serial.print(millis());
+  Serial.print(",");
+  Serial.print(motor_pos, 5);
   Serial.print(","); 
   // Serial.print("target_angle: "); 
-  Serial.print(target_angle);
-  Serial.println(",");
+  Serial.print(target_angle, 5);
+  Serial.print(","); 
+  
+
 
   err = motor_pos - target_angle;
+  Serial.print(err, 5);
+
+  Serial.println(",");
   
 
 
