@@ -77,7 +77,6 @@ float calc_ball_pos(){
 }
 
 float target_angle = 0;
-int loop_cnter = 0;
 
 void  loop() {
 
@@ -90,63 +89,39 @@ void  loop() {
 
   // make sure angle_outputisnt being set in innner loop to 0 after updating // sepearted when the inner lop reads from angle_output
 
-  // if(outerCnter == 30){
-  //   angle_output = 0;
-  //   for(int i = num_size_outer - 1; i > 0; i--){
-  //     errors_outer[i] = errors_outer[i-1];
-  //   }
-  //   float err = target-calc_ball_pos();
+  if(outerCnter == 30){
+    angle_output = 0;
+    for(int i = num_size_outer - 1; i > 0; i--){
+      errors_outer[i] = errors_outer[i-1];
+    }
+    float err = target-calc_ball_pos();
 
-  //   Serial.print("Error: "); 
-  //   Serial.print(err);
-  //   // Update front of errors array 
-  //   errors_outer[0] = err;
+    Serial.print("Error: "); 
+    Serial.print(err);
+    // Update front of errors array 
+    errors_outer[0] = err;
 
 
-  //   for(int i = denom_size_outer - 2; i > 0; i--){
-  //     cont_output_outer[i] = cont_output_outer[i-1];
-  //   }
+    for(int i = denom_size_outer - 2; i > 0; i--){
+      cont_output_outer[i] = cont_output_outer[i-1];
+    }
 
-  //   for(int i = 0; i < num_size_outer; i++){
-  //     angle_output += numerator_outer[i] * errors_outer[i];
-  //   }
-  //   for(int i = 1; i < denom_size_outer; i++){
-  //     angle_output -= denominator_outer[i] * cont_output_outer[i];
-  //   }
+    for(int i = 0; i < num_size_outer; i++){
+      angle_output += numerator_outer[i] * errors_outer[i];
+    }
+    for(int i = 1; i < denom_size_outer; i++){
+      angle_output -= denominator_outer[i] * cont_output_outer[i];
+    }
 
-  //   angle_output /= denominator_outer[0];
-  //   cont_output_outer[0] = angle_output;
-  //   outerCnter = 0;
+    angle_output /= denominator_outer[0];
+    cont_output_outer[0] = angle_output;
+    outerCnter = 0;
 
-  //   Serial.print("angle output: ");
-  //   Serial.print(angle_output);
+    Serial.print("angle output: ");
+    Serial.print(angle_output);
     
-  // } 
-  float err = 0;
-
-  float motor_val = analogRead(MOT_PIN);
-  float motor_pos = m * motor_val + x; 
-
-  target_angle = motor_pos + 0.001 * loop_cnter;
-
-    
-  // Serial.print("Current angle: ");
-  Serial.print(millis());
-  Serial.print(",");
-  Serial.print(motor_pos, 5);
-  Serial.print(","); 
-  // Serial.print("target_angle: "); 
-  Serial.print(target_angle, 5);
-  Serial.print(","); 
+  } 
   
-
-
-  err = motor_pos - target_angle;
-  Serial.print(err, 5);
-
-  Serial.println(",");
-  
-
 
   float clamped_angle = angle_output;
   if (clamped_angle > 0.7) {
@@ -155,16 +130,16 @@ void  loop() {
   else if(clamped_angle < -0.7){
     clamped_angle = -0.7;
   }
-  // Serial.print("clamped angle");
-  // Serial.print(clamped_angle);
+  Serial.print("clamped angle");
+  Serial.print(clamped_angle);
 
   // Remember to uncomment this 
-  // // // Calculate motor_encoder value, and corresponding motor position
-  // float motor_val = analogRead(MOT_PIN);
-  // float motor_pos = m * motor_val + x; 
+  // Calculate motor_encoder value, and corresponding motor position
+  float motor_val = analogRead(MOT_PIN);
+  float motor_pos = m * motor_val + x; 
 
-  // // Calculate Error 
-  // float err = motor_pos - clamped_angle;
+  // Calculate Error 
+  float err = motor_pos - clamped_angle;
 
   // Move errors back 
   for(int i = num_size_inner - 1; i > 0; i--){
@@ -209,19 +184,17 @@ void  loop() {
 
   // Serial.println("");
 
-  loop_cnter++;
-  delay(500);
 
-  // float b_pos = calc_ball_pos();
-  // Serial.print(millis()); 
-  // Serial.print(",");
-  // Serial.print(err);
-  // Serial.print(",");
-  // Serial.print(curr_cont_output);
-  // Serial.print(","); 
-  // Serial.print(motor_pos);
-  // Serial.print(",");
-  // Serial.println(b_pos);
+  float b_pos = calc_ball_pos();
+  Serial.print(millis()); 
+  Serial.print(",");
+  Serial.print(err);
+  Serial.print(",");
+  Serial.print(curr_cont_output);
+  Serial.print(","); 
+  Serial.print(motor_pos);
+  Serial.print(",");
+  Serial.println(b_pos);
 }
 
 // ================== Control ISR ==================
